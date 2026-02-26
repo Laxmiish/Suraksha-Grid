@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # 1. Common Database
+  common-db:
+    image: mysql:8.0
+    container_name: common_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: common_db
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - ./sql_scripts/init_common.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db_data/common:/var/lib/mysql
+    restart: unless-stopped
+
+  # 2. Home Owners & Laborers Database
+  home-labor-db:
+    image: mysql:8.0
+    container_name: home_labor_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: home_labor_db
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - ./sql_scripts/init_home_labor.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db_data/home_labor:/var/lib/mysql
+    restart: unless-stopped
+
+  # 3. Contractors Master Server
+  contractors-db:
+    image: mysql:8.0
+    container_name: contractors_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: contractors_master
+    ports:
+      - "127.0.0.1:3308:3306"
+    volumes:
+      - ./sql_scripts/init_contractors.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db_data/contractors:/var/lib/mysql
+    restart: unless-stopped
