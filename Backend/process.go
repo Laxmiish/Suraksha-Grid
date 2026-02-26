@@ -57,7 +57,7 @@ func main(){
 	r := gin.Default() // Logger + Recovery middleware included
 
 	// --- Routes ---
-	r.POST("/verify", verify(db, rdb))
+	r.POST("/register/initital", register(common))
 	r.POST("/register/details",registerdetails(common,contractors,handlab))
 	r.GET("/worker/attendace",)
 
@@ -70,44 +70,49 @@ func main(){
 	
 }
 
-func verify(db *sql.DB, r *redis.Client) gin.HandlerFunc {
+func register(common *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data map[string]string
-
-		// Parse JSON body
 		if err := c.ShouldBindJSON(&data); err != nil {
 			c.JSON(400, gin.H{"error": "invalid JSON"})
 			return
 		}
 
-		var usrn string
-		var query string
-		if data["type"] == "email" {
-			query = "SELECT email, urollno, pass, account_type, data_stored_in FROM users WHERE email=?"
-			parts := strings.Split(data["value"], "@")
-			if len(parts) == 2 {
-				usrn = parts[0] // extract username from email
-			}
-		}
-		if data["type"] == "roll" {
-			query = "SELECT email, urollno, pass, account_type, data_stored_in FROM users WHERE urollno=?"
-			usrn = data["value"]
-		}
+		reference_id :=data[" reference_id"]
+        name := data["name"]
+        dob := data["dob"]
+        gender := data["gender"]
+        address := data["address"]
 
-		// Query MySQL
-		var email, university_roll_no, pass, acc_type, data_in string
-		err := db.QueryRow(query, usrn).Scan(&email, &university_roll_no, &pass, &acc_type, &data_in)
-		if err != nil {
-			log.Println(err, usrn, data)
-			log.Print(err)
-			c.JSON(200, gin.H{"exists": false})
+		query=`insert into users(refrence_id,name,dob,gender,address) values(?,?,?,?,?)`
+
+		_,err=common.Exec(query,reference_id,name,dob,gender,address)
+		if err!=nil
+		{
+			log.Printf("Unable to add data to the database")
+			c.JSON(500,gin.h{"error": "Failed to save data to the database"})
+		}
+		c.JSON(201, gin.H{
+			"status":  "success",
+			"message": "Data successfully added to common database",
+		})
+	}
+}
+
+func registerdetails(common *sql.DB,contractors *sql.DB, handlab sql.DB )gin.HandlerFunc{
+	return func(c *gin.Context) {
+		var data map[string]string
+		if err := c.ShouldBindJSON(&data); err != nil {
+			c.JSON(400, gin.H{"error": "invalid JSON"})
 			return
 		}
+		refrence_id := data["refrence_id"]
+		phone := ["phone"]
+		email := ["email"]
+		password := ["password"]
+		query := `update table users set phone= ? , email= ? , password = ? , rating = 100 where refrence_id=?`
+		_,err= common.Exec(query,phone,email,password,reference_id)
+		query=`create table ? ()`
 
-		// Store in Redis
-		r.HSet(ctx, "user:"+data["value"], "email", email, "unid", university_roll_no, "pass", pass, "acc_type", acc_type)
-
-		// Return success
-		c.JSON(200, gin.H{"exists": true})
-	}
+   }
 }

@@ -22,9 +22,12 @@ class EKycResponse(BaseModel):
     address: AddressDetails
     photo_base64: Optional[str] = None
 
+class registerdetail(BaseModel):
+    phone:str
+    email:str
+    password:str
+
+
 class login1(BaseModel):
     id:str
     password:str
-class login2(BaseModel):
-    id:str
-    otp:str

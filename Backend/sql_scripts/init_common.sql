@@ -17,8 +17,6 @@ CREATE TABLE IF NOT stateandbenifit(
     state VARCHAR(200),
     benifitname VARCHAR(500),
     benifittype VARCHAR(100),
+    minimumyear INT,
     conditions VARCHAR(MAX)
-    
-
-
 )
